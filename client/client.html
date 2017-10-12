@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body{
+
+        background-image: url("background.jpg");
+
+      }
+      #top {
+
+      }
+
+      #top h1 {
+        font-size: 2em;
+      }
+
+      #content {
+        font-size: 2em;
+        text-align: center;
+      }
+
+      #main{
+        margin: 0 20% 0 20%;
+        height: 100%;
+        background-color: rgba(33,34,41,0.95);
+        color: #999;  
+      }
+    
+    .testing {
+      margin-top: 5px;
+    }
+  </style>
+  <title>Our simple HTTP server</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+  <script type="text/babel">
+  const parseJSON = (xhr, content) => {
+      const obj = JSON.parse(xhr.response);
+      console.dir(obj);
+        
+      if(obj.message) {
+          const p = document.createElement('p');
+          p.textContent = `Message: ${obj.message}`;
+          content.appendChild(p);
+      }
+       
+      if(obj.users) {
+          const userList = document.createElement('p');
+          const users = JSON.stringify(obj.users);
+          userList.textContent = users;
+          content.appendChild(userList);
+      }
+    };
+
+   // handles an xhr response
+    const handleResponse = (xhr) => {
+        // grab the content section
+        const content = document.querySelector("#content");
+        
+        // handle different status codes
+        switch(xhr.status) {
+          case 200: // success
+            content.innerHTML = `<b>Success</b>`;
+            break;
+          case 201: // created
+            content.innerHTML = `<b>Create</b>`;
+            break;
+          case 204: // updated (send nothing back)
+            content.innerHTML = `<b>Updated (No Content)</b>`;
+            return;
+          case 304: // not updated
+            content.innerHTML = `<b>Not Modified</b>`;
+            break;
+          case 400: // bad request
+            content.innerHTML = `<b>Bad Request</b>`;
+            break;
+          case 404: // not found
+            content.innerHTML = `<b>Not found</b>`;
+          default: // any other status code
+            content.innerHTML = `<b>Resource Not Found</b>`;
+            break;
+        }
+        
+        //finally, parse the response
+        if(xhr.response){
+            parseJSON(xhr, content);
+        }
+        
+    };
+
+    //function to send request
+    const requestUpdate = (e, userForm) => {
+        const url = userForm.querySelector('#urlField').value;
+        const method = userForm.querySelector('#methodSelect').value;
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.open(method, url);
+        
+        xhr.setRequestHeader('Accept', 'application/json');
+        
+        xhr.onload = () => handleResponse(xhr);
+        
+        xhr.send();
+        
+        e.preventDefault();
+        
+        return false;
+    }
+    
+     //function to send our post request
+    const sendPost = (e, nameForm) => {
+        const nameAction = nameForm.getAttribute('action');
+        const nameMethod = nameForm.getAttribute('method');
+        
+        const nameField = nameForm.querySelector('#nameField');
+        const ageField = nameForm.querySelector('#ageField');
+        const raceField = nameForm.querySelector('#raceField');
+        const classField = nameForm.querySelector('#classField');
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.open(nameMethod, nameAction);
+        
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        
+        xhr.setRequestHeader('Accept', 'application/json');
+        
+        xhr.onload = () => handleResponse(xhr);
+        
+        const formData = `name=${nameField.value}&age=${ageField.value}&race=${raceField.value}&class=${classField.value}`;
+        xhr.send(formData);
+        
+        e.preventDefault();
+        
+        return false;
+    }
+    
+     // initialization function
+    const init = () => {
+        const nameForm = document.querySelector("#nameForm");
+        const addUser = (e) => sendPost(e, nameForm);
+        nameForm.addEventListener('submit', addUser);
+        
+        const userForm = document.querySelector('#userForm');
+        const getUsers = (e) => requestUpdate(e, userForm);
+        userForm.addEventListener('submit', getUsers); 
+    };
+
+    window.onload = init;
+  </script>
+</head>
+<body>
+  <section id="main">
+    <section id="top">
+      <h3>POST Status Code Tests</h3> 
+      <form id="nameForm" action="/addUser" method="post">
+        <div class="testing">
+          <label for="name">Name: </label>
+          <input id="nameField" type="text" name="name" />
+        </div>
+        <div class="testing">
+          <label for="age">Age: </label>
+          <input id="ageField" type="number" name="age" min="0" max="100" step="1"/>
+        </div>
+        <div class="testing">
+          <label for="race">Race: </label>
+          <select id="raceField">
+            <option value="Human">Human</option>
+            <option value="Orc">Human</option>
+            <option value="Night Elf">Night Elf</option>
+          </select>
+        </div>
+        <div class="testing">
+          <label for="class">Class: </label>
+          <select id="classField">
+            <option value="Warrior">Warrior</option>
+            <option value="Rogue">Rogue</option>
+            <option value="Hunter">Hunter</option>
+          </select>
+        </div>
+        <input type="submit" value="Create a new character" />
+      </form>
+      <form id="userForm" action="/getUsers" method="get">
+        <select id='urlField'>
+          <option value='/getUsers'>/getUsers</option>
+          <option value='/notReal'>/notReal</option>
+        </select>
+        <select id="methodSelect">
+          <option value="get">GET</option>
+          <option value="head">HEAD</option>
+        </select>
+        <input type="submit" value="Get User" />
+      </form>
+    </section>
+    <section id="content">
+    </section>
+  </section>
+</body>
+</html>
