@@ -11,6 +11,7 @@ const onRequest = (request, response) => {
   // parse url into individual parts
   // returns an object of url parts by name
   const parsedUrl = url.parse(request.url);
+  const params = query.parse(parsedUrl.query)
 
   // check the request method (get, head, post, etc)
   switch (request.method) {
@@ -21,9 +22,12 @@ const onRequest = (request, response) => {
       } else if (parsedUrl.pathname === '/style.css') {
         // if stylesheet, send stylesheet
         htmlHandler.getCSS(request, response);
+      } else if (parsedUrl.pathname === '/background.jpg') {
+        // if get users, send user object back
+        htmlHandler.getBackground(request, response);
       } else if (parsedUrl.pathname === '/getUsers') {
         // if get users, send user object back
-        jsonHandler.getUsers(request, response);
+        jsonHandler.getUsers(request, response, params);
       } else {
         // if not found, send 404 message
         jsonHandler.notFound(request, response);
@@ -32,7 +36,7 @@ const onRequest = (request, response) => {
     case 'HEAD':
       if (parsedUrl.pathname === '/getUsers') {
         // if get users, send meta data back with etag
-        jsonHandler.getUsersMeta(request, response);
+        jsonHandler.getUsersMeta(request, response, params);
       } else {
         // if not found send 404 without body
         jsonHandler.notFoundMeta(request, response);

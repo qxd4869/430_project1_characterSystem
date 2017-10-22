@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
   <style>
@@ -45,12 +45,42 @@
   const parseJSON = (xhr, content) => {
       const obj = JSON.parse(xhr.response);
       console.dir(obj);
-        
-      if(obj.message) {
+  
+      if(obj.message) { 
           const p = document.createElement('p');
           p.textContent = `Message: ${obj.message}`;
           content.appendChild(p);
       }
+        // If there was a 404 error retrieving the quote
+      if(obj.getCharacterError) {
+          const pTag = document.createElement('p');
+          const message = obj.getQuoteError;
+          
+          pTag.textContent = message;
+          content.appendChild(pTag);
+      }
+      // the quote was retrieved successfully
+      if(obj.getCharacter) {
+          let data = obj.getCharacter;
+          const name = data.name;
+          const pTag2 = document.createElement('p');
+          const age = data.age;
+          const pTag3 = document.createElement('p');
+          const race = data.race;
+          const pTag4 = document.createElement('p');
+          const class = data.class;
+          const pTag5 = document.createElement('p');
+          
+          pTag2.textContent = `"${name}"`;
+          pTag3.textContent = `-${age}`;
+          pTag4.textContent = `"${race}"`;
+          pTag5.textContent = `"${class}"`;
+          content.appendChild(pTag2);
+          content.appendChild(pTag3);
+          content.appendChild(pTag4);
+          content.appendChild(pTag5);
+      }
+    
        
       if(obj.users) {
           const userList = document.createElement('p');
@@ -98,9 +128,12 @@
 
     //function to send request
     const requestUpdate = (e, userForm) => {
-        const url = userForm.querySelector('#urlField').value;
-        const method = userForm.querySelector('#methodSelect').value;
+        const url = "/getUsers";
+        const method = "get";
         
+        let character = userForm.querySelector('#findCharacter').value;
+        url += `?name=${character}`;  
+      
         const xhr = new XMLHttpRequest();
         
         xhr.open(method, url);
@@ -161,7 +194,7 @@
 <body>
   <section id="main">
     <section id="top">
-      <h3>POST Status Code Tests</h3> 
+      <h3>Create your character</h3> 
       <form id="nameForm" action="/addUser" method="post">
         <div class="testing">
           <label for="name">Name: </label>
@@ -190,14 +223,8 @@
         <input type="submit" value="Create a new character" />
       </form>
       <form id="userForm" action="/getUsers" method="get">
-        <select id='urlField'>
-          <option value='/getUsers'>/getUsers</option>
-          <option value='/notReal'>/notReal</option>
-        </select>
-        <select id="methodSelect">
-          <option value="get">GET</option>
-          <option value="head">HEAD</option>
-        </select>
+        <label for="name">Find quote from: </label>
+        <input id="findCharacter" placeholder="Enter name here!" type="text" name="name" />
         <input type="submit" value="Get User" />
       </form>
     </section>

@@ -41,10 +41,17 @@ const respondJSONMeta = (request, response, status) => {
 
 // get user object
 // should calculate a 200 or 304 based on etag
-const getUsers = (request, response) => {
-  // json object to send
+const getUsers = (request, response, params) => {
+  if (!users[params.name]) {
+    const responseJSON = {
+      getCharacterError: 'There is no such character',
+    };
+    return respondJSON(request, response, 404, responseJSON);
+  }
+
+  console.log('getting quote');
   const responseJSON = {
-    users,
+    getCharacter: users[params.name],
   };
 
   // If the version number (originally set by the server in etag)
