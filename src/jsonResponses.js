@@ -1,7 +1,7 @@
 const crypto = require('crypto');
-const users = {};
+const characters = {};
 
-let etag = crypto.createHash('sha1').update(JSON.stringify(users));
+let etag = crypto.createHash('sha1').update(JSON.stringify(characters));
 let digest = etag.digest('hex');
 
 // function to respond with a json object
@@ -39,19 +39,18 @@ const respondJSONMeta = (request, response, status) => {
   response.end();
 };
 
-// get user object
+// get character object
 // should calculate a 200 or 304 based on etag
-const getUsers = (request, response, params) => {
-  if (!users[params.name]) {
+const getCharacter = (request, response, params) => {
+  if (!characters[params.name]) {
     const responseJSON = {
       getCharacterError: 'There is no such character',
     };
     return respondJSON(request, response, 404, responseJSON);
   }
 
-  console.log('getting quote');
   const responseJSON = {
-    getCharacter: users[params.name],
+    getCharacter: characters[params.name],
   };
 
   // If the version number (originally set by the server in etag)
@@ -68,9 +67,9 @@ const getUsers = (request, response, params) => {
   return respondJSON(request, response, 200, responseJSON);
 };
 
-// get meta info about user object
+// get meta info about character object
 // should calculate a 200 or 304 based on etag
-const getUsersMeta = (request, response) => {
+const getCharactersMeta = (request, response) => {
   // check the client's if-none-match header to see the version
   // number the client is returning (from etag)
   // If the version number (originally set by the server in etag)
@@ -84,8 +83,8 @@ const getUsersMeta = (request, response) => {
   return respondJSONMeta(request, response, 200);
 };
 
-const addUser = (request, response, body) => {
-  const responseJSON = {
+const addCharacter = (request, response, body) => {
+ const responseJSON = {
     message: 'Name and age are both required.',
   };
 
@@ -98,20 +97,20 @@ const addUser = (request, response, body) => {
   let responseCode = 201;
 
   //
-  if (users[body.name]) {
+  if (characters[body.name]) {
     responseCode = 204;
   } else {
-    users[body.name] = {};
+    characters[body.name] = {};
   }
 
-  // throw the new users into the object
-  users[body.name].name = body.name;
-  users[body.name].age = body.age;
-  users[body.name].race = body.race;
-  users[body.name].class = body.class;
+  // throw the new characters into the object
+  characters[body.name].name = body.name;
+  characters[body.name].age = body.age;
+  characters[body.name].race = body.race;
+  characters[body.name].class = body.class;
 
   // creating a new hash object
-  etag = crypto.createHash('sha1').update(JSON.stringify(users));
+  etag = crypto.createHash('sha1').update(JSON.stringify(characters));
   // recalculating the hash digest for etag
   digest = etag.digest('hex');
 
@@ -143,9 +142,9 @@ const notFoundMeta = (request, response) => {
 
 // set public modules
 module.exports = {
-  getUsers,
-  getUsersMeta,
-  addUser,
+  getCharacter,
+  getCharactersMeta,
+  addCharacter,
   notFound,
   notFoundMeta,
 };

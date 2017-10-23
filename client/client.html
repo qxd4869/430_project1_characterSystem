@@ -1,60 +1,19 @@
   <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-      html, body {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      body{
-
-        background-image: url("background.jpg");
-
-      }
-      #top {
-
-      }
-
-      #top h1 {
-        font-size: 2em;
-      }
-
-      #content {
-        font-size: 2em;
-        text-align: center;
-      }
-
-      #main{
-        margin: 0 20% 0 20%;
-        height: 100%;
-        background-color: rgba(33,34,41,0.95);
-        color: #999;  
-      }
-    
-    .testing {
-      margin-top: 5px;
-    }
-  </style>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
   const parseJSON = (xhr, content) => {
       const obj = JSON.parse(xhr.response);
       console.dir(obj);
   
-      if(obj.message) { 
-          const p = document.createElement('p');
-          p.textContent = `Message: ${obj.message}`;
-          content.appendChild(p);
-      }
+
         // If there was a 404 error retrieving the quote
       if(obj.getCharacterError) {
           const pTag = document.createElement('p');
-          const message = obj.getQuoteError;
+          const message = obj.getCharacterErrosr;
           
           pTag.textContent = message;
           content.appendChild(pTag);
@@ -63,30 +22,13 @@
       if(obj.getCharacter) {
           let data = obj.getCharacter;
           const name = data.name;
+          const race = data.race.toLowerCase();
+          const characterClass = data.class.toLowerCase();
+          const age = data.age.toLowerCase();
           const pTag2 = document.createElement('p');
-          const age = data.age;
-          const pTag3 = document.createElement('p');
-          const race = data.race;
-          const pTag4 = document.createElement('p');
-          const class = data.class;
-          const pTag5 = document.createElement('p');
           
-          pTag2.textContent = `"${name}"`;
-          pTag3.textContent = `-${age}`;
-          pTag4.textContent = `"${race}"`;
-          pTag5.textContent = `"${class}"`;
-          content.appendChild(pTag2);
-          content.appendChild(pTag3);
-          content.appendChild(pTag4);
-          content.appendChild(pTag5);
-      }
-    
-       
-      if(obj.users) {
-          const userList = document.createElement('p');
-          const users = JSON.stringify(obj.users);
-          userList.textContent = users;
-          content.appendChild(userList);
+          pTag2.textContent = `The legendary ${race} ${characterClass} ${name} starts his journey at the age of ${age}`;
+          content.appendChild(pTag2)
       }
     };
 
@@ -98,40 +40,39 @@
         // handle different status codes
         switch(xhr.status) {
           case 200: // success
-            content.innerHTML = `<b>Success</b>`;
+            content.innerHTML = `<b>Champion found</b>`;
             break;
           case 201: // created
-            content.innerHTML = `<b>Create</b>`;
+            content.innerHTML = `<b>You champion is ready!</b>`;
             break;
           case 204: // updated (send nothing back)
-            content.innerHTML = `<b>Updated (No Content)</b>`;
+            content.innerHTML = `<b>An identity has been updated</b>`;
             return;
           case 304: // not updated
             content.innerHTML = `<b>Not Modified</b>`;
             break;
           case 400: // bad request
-            content.innerHTML = `<b>Bad Request</b>`;
+            content.innerHTML = `<b></b>`;
             break;
           case 404: // not found
             content.innerHTML = `<b>Not found</b>`;
           default: // any other status code
-            content.innerHTML = `<b>Resource Not Found</b>`;
+            content.innerHTML = `<b>No champion with that name exists</b>`;
             break;
         }
-        
+          
         //finally, parse the response
         if(xhr.response){
             parseJSON(xhr, content);
         }
-        
     };
 
     //function to send request
-    const requestUpdate = (e, userForm) => {
-        const url = "/getUsers";
+    const requestUpdate = (e, findForm) => {
+        let url = "/getCharacter";
         const method = "get";
         
-        let character = userForm.querySelector('#findCharacter').value;
+        let character = findForm.querySelector('#findCharacter').value;
         url += `?name=${character}`;  
       
         const xhr = new XMLHttpRequest();
@@ -180,12 +121,12 @@
      // initialization function
     const init = () => {
         const nameForm = document.querySelector("#nameForm");
-        const addUser = (e) => sendPost(e, nameForm);
-        nameForm.addEventListener('submit', addUser);
+        const addCharacter = (e) => sendPost(e, nameForm);
+        nameForm.addEventListener('submit', addCharacter);
         
-        const userForm = document.querySelector('#userForm');
-        const getUsers = (e) => requestUpdate(e, userForm);
-        userForm.addEventListener('submit', getUsers); 
+        const findForm = document.querySelector('#findForm');
+        const getCharacter = (e) => requestUpdate(e, findForm);
+        findForm.addEventListener('submit', getCharacter); 
     };
 
     window.onload = init;
@@ -194,8 +135,8 @@
 <body>
   <section id="main">
     <section id="top">
-      <h3>Create your character</h3> 
-      <form id="nameForm" action="/addUser" method="post">
+      <h1>Your legendary journey begins!</h1> 
+      <form id="nameForm" action="/addCharacter" method="post">
         <div class="testing">
           <label for="name">Name: </label>
           <input id="nameField" type="text" name="name" />
@@ -208,7 +149,7 @@
           <label for="race">Race: </label>
           <select id="raceField">
             <option value="Human">Human</option>
-            <option value="Orc">Human</option>
+            <option value="Orc">Orc</option>
             <option value="Night Elf">Night Elf</option>
           </select>
         </div>
@@ -222,10 +163,9 @@
         </div>
         <input type="submit" value="Create a new character" />
       </form>
-      <form id="userForm" action="/getUsers" method="get">
-        <label for="name">Find quote from: </label>
+      <form id="findForm" action="/getCharacter" method="get">
         <input id="findCharacter" placeholder="Enter name here!" type="text" name="name" />
-        <input type="submit" value="Get User" />
+        <input type="submit" value="Get Character" />
       </form>
     </section>
     <section id="content">

@@ -11,7 +11,7 @@ const onRequest = (request, response) => {
   // parse url into individual parts
   // returns an object of url parts by name
   const parsedUrl = url.parse(request.url);
-  const params = query.parse(parsedUrl.query)
+  const params = query.parse(parsedUrl.query);
 
   // check the request method (get, head, post, etc)
   switch (request.method) {
@@ -23,28 +23,28 @@ const onRequest = (request, response) => {
         // if stylesheet, send stylesheet
         htmlHandler.getCSS(request, response);
       } else if (parsedUrl.pathname === '/background.jpg') {
-        // if get users, send user object back
+        // if background image, send it back
         htmlHandler.getBackground(request, response);
-      } else if (parsedUrl.pathname === '/getUsers') {
-        // if get users, send user object back
-        jsonHandler.getUsers(request, response, params);
+      } else if (parsedUrl.pathname === '/getCharacter') {
+        // if get chracters, send character object back
+        jsonHandler.getCharacter(request, response, params);
       } else {
         // if not found, send 404 message
         jsonHandler.notFound(request, response);
       }
       break;
     case 'HEAD':
-      if (parsedUrl.pathname === '/getUsers') {
-        // if get users, send meta data back with etag
-        jsonHandler.getUsersMeta(request, response, params);
+      if (parsedUrl.pathname === '/getCharacters') {
+        // if get characterss, send meta data back with etag
+        jsonHandler.getCharactersMeta(request, response, params);
       } else {
         // if not found send 404 without body
         jsonHandler.notFoundMeta(request, response);
       }
       break;
     case 'POST':
-      // if post is to /addUser (our only POST url)
-      if (parsedUrl.pathname === '/addUser') {
+      // if post is to /addCharacter (our only POST url)
+      if (parsedUrl.pathname === '/addCharacter') {
         const res = response;
 
         // uploads come in as a byte stream that we need 
@@ -75,12 +75,12 @@ const onRequest = (request, response) => {
           // Parse the string into an object by field name
           const bodyParams = query.parse(bodyString);
 
-          // pass to our addUser function
-          jsonHandler.addUser(request, res, bodyParams);
+          // pass to our addCharacter function
+          jsonHandler.addCharacter(request, res, bodyParams);
         });
       }
       break;
-    default:
+      default:
       // send 404 in any other case
       jsonHandler.notFound(request, response);
   }
